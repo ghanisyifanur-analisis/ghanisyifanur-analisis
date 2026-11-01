@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import { timingSafeEqual } from "node:crypto";
 import pg from "pg";
 
 const app = express();
@@ -40,6 +41,17 @@ app.get("/health", async (_req, res) => {
 // Payload yang diharapkan: { app, sender, phone, message, group_name }.
 // Respons: { reply: "..." }.
 app.post("/reply", async (req, res) => {
+  const expectedKey = process.env.WHATS_AUTO_HEADER_VALUE || "";
+  const headerName = (process.env.WHATS_AUTO_HEADER_NAME || "x-bot-key").toLowerCase();
+  if (expectedKey) {
+    const suppliedKey = String(req.headers[headerName] || "");
+    const expected = Buffer.from(expectedKey);
+    const supplied = Buffer.from(suppliedKey);
+    if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+  }
+
   const { app: sourceApp = "unknown", sender = "", phone = "", message = "", group_name: groupName = "" } = req.body || {};
   if (typeof message !== "string" || !message.trim()) {
     return res.status(400).json({ error: "Field 'message' wajib berupa teks." });
