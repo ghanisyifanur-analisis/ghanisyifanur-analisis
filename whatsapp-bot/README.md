@@ -31,6 +31,7 @@ Di WhatsAuto, buka **Server** dan isi:
 - Server URL: `https://DOMAIN-ATAU-TUNNEL-ANDA/reply`
 - Method: `POST`
 - Type: `JSON`
+- Header (opsional tetapi wajib disarankan untuk endpoint publik): Key `X-Bot-Key`, Value sama dengan `WHATS_AUTO_HEADER_VALUE` di `.env`.
 
 Aplikasi mengirim JSON dengan properti `app`, `sender`, `phone`, `message`, dan `group_name`. Server mengembalikan JSON `{ "reply": "teks balasan" }`. Jangan gunakan alamat `localhost` pada ponsel untuk server yang berjalan di PC; gunakan IP LAN (hanya saat satu jaringan) atau HTTPS publik.
 
@@ -73,7 +74,7 @@ Data PostgreSQL tersimpan di named volume `whatsapp_pgdata`. `docker compose dow
 ## Keamanan & batasan
 
 - Jangan commit `.env`, token, password, OTP, atau PIN.
-- Batasi endpoint callback melalui HTTPS dan konfigurasi jaringan yang sesuai sebelum dipakai publik.
+- Aktifkan shared secret `WHATS_AUTO_HEADER_VALUE` dan isi header yang sama pada WhatsAuto sebelum membuka endpoint ke internet; gunakan HTTPS. Jangan memakai nilai contoh di produksi.
 - Minta persetujuan penerima sebelum mengirim pesan; hindari spam/broadcast tanpa izin.
 - WhatsAuto mengandalkan notifikasi dan izin Android; auto-reply dapat gagal jika notifikasi dimatikan, chat dibisukan, aplikasi dibatasi baterai, atau ponsel offline.
 - Endpoint ini belum menggunakan AI generatif. Balasan saat ini berbasis kata kunci.
